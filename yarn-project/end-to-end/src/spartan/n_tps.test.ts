@@ -9,7 +9,6 @@ import { ProvenTx, TestWallet, proveInteraction } from '@aztec/test-wallet/serve
 
 import { jest } from '@jest/globals';
 import type { ChildProcess } from 'child_process';
-import { base } from 'viem/chains';
 
 import { getSponsoredFPCAddress } from '../fixtures/utils.js';
 import {
