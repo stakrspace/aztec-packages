@@ -1,5 +1,5 @@
 import { Buffer32 } from '@aztec/foundation/buffer';
-import { BufferReader, serializeToBuffer } from '@aztec/foundation/serialize';
+import { BufferReader, bigintToUInt64BE, serializeToBuffer } from '@aztec/foundation/serialize';
 
 import type { TopicType } from './topic_type.js';
 
@@ -15,7 +15,7 @@ export class P2PMessage {
 
   static fromMessageData(messageData: Buffer, instrumentMessages = false): P2PMessage {
     const reader = new BufferReader(messageData);
-    const timestamp = instrumentMessages ? new Date(Number(reader.readNumber())) : undefined;
+    const timestamp = instrumentMessages ? new Date(Number(reader.readUInt64())) : undefined;
     const payload = reader.readBuffer();
     return new P2PMessage(payload, timestamp);
   }
@@ -23,7 +23,7 @@ export class P2PMessage {
   toMessageData(): Buffer {
     const arr: Buffer[] = [];
     if (this.timestamp) {
-      arr.push(serializeToBuffer(this.timestamp.getTime()));
+      arr.push(bigintToUInt64BE(BigInt(this.timestamp.getTime())));
     }
     arr.push(serializeToBuffer(this.payload.length, this.payload));
     return serializeToBuffer(arr);

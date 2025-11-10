@@ -11,4 +11,14 @@ describe('p2p message', () => {
     expect(deserializedP2PMessage.payload.length).toEqual(txAsBuffer.length);
     expect(deserializedP2PMessage.payload).toEqual(txAsBuffer);
   });
+
+  it('serializes and deserializes with instrumentation', () => {
+    const tx = Tx.random({ randomProof: true });
+    const txAsBuffer = tx.toBuffer();
+    const p2pMessage = P2PMessage.fromGossipable(tx, true);
+    const serialized = p2pMessage.toMessageData();
+    const deserializedP2PMessage = P2PMessage.fromMessageData(serialized, true);
+    expect(deserializedP2PMessage.payload.length).toEqual(txAsBuffer.length);
+    expect(deserializedP2PMessage.payload).toEqual(txAsBuffer);
+  });
 });
