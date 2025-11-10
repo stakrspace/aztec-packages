@@ -98,7 +98,8 @@ node:
   coinbase:
 
   # -- Exclude metrics - comma separated list of metrics to exclude
-  otelExcludeMetrics: ""
+  otelExcludeMetrics: null
+  otelIncludeMetrics: null
 
   storage:
     # -- Data directory

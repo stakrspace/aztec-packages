@@ -57,6 +57,18 @@ variable "BOT_RESOURCE_PROFILE" {
   default     = "prod"
 }
 
+variable "DEBUG_P2P_INSTRUMENT_MESSAGES" {
+  description = "Whether to enable debug instrumentation of P2P messages"
+  type        = bool
+  default     = false
+}
+
+variable "PROVER_TEST_VERIFICATION_DELAY_MS" {
+  description = "The delay (ms) to inject during fake proof verification"
+  type        = number
+  default     = 10
+}
+
 variable "K8S_CLUSTER_CONTEXT" {
   description = "GKE cluster context"
   type        = string
@@ -538,4 +550,16 @@ variable "PROVER_AGENT_POLL_INTERVAL_MS" {
   description = "Interval in milliseconds between prover agent polls"
   type        = number
   default     = 1000
+}
+
+variable "PROVER_AGENT_INCLUDE_METRICS" {
+  description = "Metrics whitelist in the prover agent"
+  type        = string
+  default     = null
+}
+
+variable "FULL_NODE_INCLUDE_METRICS" {
+  description = "Metrics whitelist in the full node"
+  type        = string
+  default     = null
 }

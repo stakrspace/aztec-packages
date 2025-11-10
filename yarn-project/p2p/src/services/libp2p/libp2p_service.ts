@@ -615,7 +615,7 @@ export class LibP2PService<T extends P2PClientType = P2PClientType.Full> extends
     if (!this.node.services.pubsub) {
       throw new Error('Pubsub service not available.');
     }
-    const p2pMessage = P2PMessage.fromGossipable(message);
+    const p2pMessage = P2PMessage.fromGossipable(message, this.config.debugP2PInstrumentMessages);
     const result = await this.node.services.pubsub.publish(topic, p2pMessage.toMessageData());
     return result.recipients.length;
   }
@@ -666,7 +666,9 @@ export class LibP2PService<T extends P2PClientType = P2PClientType.Full> extends
    * @param data - The message data
    */
   protected async handleNewGossipMessage(msg: Message, msgId: string, source: PeerId) {
-    const p2pMessage = P2PMessage.fromMessageData(Buffer.from(msg.data));
+    const msgReceivedTime = Date.now();
+    let topicType: TopicType | undefined;
+    const p2pMessage = P2PMessage.fromMessageData(Buffer.from(msg.data), this.config.debugP2PInstrumentMessages);
 
     const preValidationResult = this.preValidateReceivedMessage(msg, msgId, source);
 
@@ -675,13 +677,23 @@ export class LibP2PService<T extends P2PClientType = P2PClientType.Full> extends
     }
 
     if (msg.topic === this.topicStrings[TopicType.tx]) {
+      topicType = TopicType.tx;
       await this.handleGossipedTx(p2pMessage.payload, msgId, source);
     }
-    if (msg.topic === this.topicStrings[TopicType.block_attestation] && this.clientType === P2PClientType.Full) {
-      await this.processAttestationFromPeer(p2pMessage.payload, msgId, source);
+    if (msg.topic === this.topicStrings[TopicType.block_attestation]) {
+      topicType = TopicType.block_attestation;
+      if (this.clientType === P2PClientType.Full) {
+        await this.processAttestationFromPeer(p2pMessage.payload, msgId, source);
+      }
     }
     if (msg.topic === this.topicStrings[TopicType.block_proposal]) {
+      topicType = TopicType.block_proposal;
       await this.processBlockFromPeer(p2pMessage.payload, msgId, source);
+    }
+
+    if (p2pMessage.timestamp !== undefined && topicType !== undefined) {
+      const latency = msgReceivedTime - p2pMessage.timestamp.getTime();
+      this.instrumentation.recordMessageLatency(topicType, latency);
     }
 
     return;
