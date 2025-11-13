@@ -1,5 +1,6 @@
 import type { EthSigner } from '@aztec/ethereum';
 import type { Buffer32 } from '@aztec/foundation/buffer';
+import type { Secp256k1Signer } from '@aztec/foundation/crypto';
 import { EthAddress } from '@aztec/foundation/eth-address';
 import type { Signature } from '@aztec/foundation/eth-signature';
 import { KeystoreManager, loadKeystoreFile } from '@aztec/node-keystore';
@@ -225,6 +226,26 @@ export class NodeKeystoreAdapter implements ExtendedValidatorKeyStore {
       }
     }
     return out;
+  }
+
+  /**
+   * Get the signer for a specific address
+   * @throws Error - NodeKeystoreAdapter does not support direct signer access
+   */
+  getSignerForAddress(_address: EthAddress): Secp256k1Signer {
+    throw new Error(
+      'Custom k signing is not supported with NodeKeystoreAdapter (remote signers/keystores). Only LocalKeyStore supports custom k signing for red-team testing.',
+    );
+  }
+
+  /**
+   * Get signer by index
+   * @throws Error - NodeKeystoreAdapter does not support direct signer access
+   */
+  getSigner(_index: number): Secp256k1Signer {
+    throw new Error(
+      'Custom k signing is not supported with NodeKeystoreAdapter (remote signers/keystores). Only LocalKeyStore supports custom k signing for red-team testing.',
+    );
   }
 
   /**
