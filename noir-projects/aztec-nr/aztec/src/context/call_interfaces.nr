@@ -95,6 +95,7 @@ impl<let M: u32, T> CallInterface<M> for PrivateCallInterface<M, T> {
 
 // PrivateStaticCallInterface
 
+#[must_use = "Your private static call needs to be passed into the `self.view(...)` method to be executed (e.g. `self.view(MyContract::at(address).my_private_static_function(...args))`"]
 pub struct PrivateStaticCallInterface<let M: u32, T> {
     target_contract: AztecAddress,
     selector: FunctionSelector,
@@ -167,6 +168,7 @@ impl<let M: u32, T> CallInterface<M> for PrivateStaticCallInterface<M, T> {
 
 // PublicCallInterface
 
+#[must_use = "Your public call needs to be passed into the `self.call(...)`, `self.enqueue(...)` or `self.enqueue_incognito(...)` method to be executed (e.g. `self.call(MyContract::at(address).my_public_function(...args))`"]
 pub struct PublicCallInterface<let M: u32, T> {
     target_contract: AztecAddress,
     selector: FunctionSelector,
@@ -307,6 +309,7 @@ impl<let M: u32, T> CallInterface<M> for PublicCallInterface<M, T> {
 
 // PublicStaticCallInterface
 
+#[must_use = "Your public static call needs to be passed into the `self.view(...)`, `self.enqueue_view(...)` or `self.enqueue_view_incognito(...)` method to be executed (e.g. `self.view(MyContract::at(address).my_public_static_function(...args))`"]
 pub struct PublicStaticCallInterface<let M: u32, T> {
     target_contract: AztecAddress,
     selector: FunctionSelector,
