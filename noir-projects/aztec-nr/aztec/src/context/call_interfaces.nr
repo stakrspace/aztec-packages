@@ -18,6 +18,7 @@ pub trait CallInterface<let N: u32> {
 
 // PrivateCallInterface
 
+#[must_use = "Your private call needs to be passed into the `self.call(...)` method to be executed (e.g. `self.call(MyContract::at(address).my_private_function(...args))`"]
 pub struct PrivateCallInterface<let M: u32, T> {
     target_contract: AztecAddress,
     selector: FunctionSelector,
