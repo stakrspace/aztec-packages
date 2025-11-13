@@ -24,6 +24,11 @@ export class P2PInstrumentation {
   private aggLatencyMetrics: Record<'min' | 'max' | 'p50' | 'p90' | 'avg', ObservableGauge>;
   private aggValidationMetrics: Record<'min' | 'max' | 'p50' | 'p90' | 'avg', ObservableGauge>;
 
+  // Gossipsub total score histogram
+  private gossipsubScoreHisto: RecordableHistogram = createHistogram({ min: -1000, max: 1000 });
+
+  private gossipsubScoreMetrics: Record<'min' | 'max' | 'p50' | 'p90' | 'avg', ObservableGauge>;
+
   constructor(client: TelemetryClient, name: string) {
     const meter = client.getMeter(name);
 
@@ -100,9 +105,34 @@ export class P2PInstrumentation {
       }),
     };
 
+    // Initialize gossipsub score metrics (total score only)
+    this.gossipsubScoreMetrics = {
+      avg: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_SCORE_TOTAL_AVG, {
+        valueType: ValueType.DOUBLE,
+        description: 'AVG gossipsub total score',
+      }),
+      max: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_SCORE_TOTAL_MAX, {
+        valueType: ValueType.DOUBLE,
+        description: 'MAX gossipsub total score',
+      }),
+      min: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_SCORE_TOTAL_MIN, {
+        valueType: ValueType.DOUBLE,
+        description: 'MIN gossipsub total score',
+      }),
+      p50: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_SCORE_TOTAL_P50, {
+        valueType: ValueType.DOUBLE,
+        description: 'P50 gossipsub total score',
+      }),
+      p90: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_SCORE_TOTAL_P90, {
+        valueType: ValueType.DOUBLE,
+        description: 'P90 gossipsub total score',
+      }),
+    };
+
     meter.addBatchObservableCallback(this.aggregate, [
       ...Object.values(this.aggValidationMetrics),
       ...Object.values(this.aggLatencyMetrics),
+      ...Object.values(this.gossipsubScoreMetrics),
     ]);
   }
 
@@ -136,6 +166,18 @@ export class P2PInstrumentation {
     latencyHistogram.record(Math.max(ms, 1));
   }
 
+  public updateGossipsubScores(scores: number[]) {
+    // Reset histogram
+    this.gossipsubScoreHisto.reset();
+
+    // Record all scores
+    for (const score of scores) {
+      // Clamp score to histogram range
+      const clampedScore = Math.max(-1000, Math.min(1000, score));
+      this.gossipsubScoreHisto.record(clampedScore);
+    }
+  }
+
   private aggregate = (res: BatchObservableResult) => {
     for (const [metrics, histograms] of [
       [this.aggLatencyMetrics, this.aggLatencyHisto],
@@ -153,6 +195,15 @@ export class P2PInstrumentation {
         res.observe(metrics.p50, histogram.percentile(50), { [Attributes.TOPIC_NAME]: topicName });
         res.observe(metrics.p90, histogram.percentile(90), { [Attributes.TOPIC_NAME]: topicName });
       }
+    }
+
+    // Aggregate gossipsub scores
+    if (this.gossipsubScoreHisto.count > 0) {
+      res.observe(this.gossipsubScoreMetrics.avg, this.gossipsubScoreHisto.mean);
+      res.observe(this.gossipsubScoreMetrics.max, this.gossipsubScoreHisto.max);
+      res.observe(this.gossipsubScoreMetrics.min, this.gossipsubScoreHisto.min);
+      res.observe(this.gossipsubScoreMetrics.p50, this.gossipsubScoreHisto.percentile(50));
+      res.observe(this.gossipsubScoreMetrics.p90, this.gossipsubScoreHisto.percentile(90));
     }
   };
 }

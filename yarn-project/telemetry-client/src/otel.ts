@@ -266,6 +266,14 @@ export class OpenTelemetryClient implements TelemetryClient {
             true,
           ),
         }),
+        new View({
+          instrumentType: InstrumentType.HISTOGRAM,
+          instrumentUnit: 'score',
+          aggregation: new ExplicitBucketHistogramAggregation(
+            [-500, -100, -75, -50, -25, 0, 25, 50, 75, 100, 500],
+            true,
+          ),
+        }),
       ],
     });
   }

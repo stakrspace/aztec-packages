@@ -112,6 +112,8 @@ export const L1_TX_BLOB_FEE = 'aztec.l1_tx.blob_fee';
 export const PEER_MANAGER_GOODBYES_SENT = 'aztec.peer_manager.goodbyes_sent';
 export const PEER_MANAGER_GOODBYES_RECEIVED = 'aztec.peer_manager.goodbyes_received';
 export const PEER_MANAGER_PEER_COUNT = 'aztec.peer_manager.peer_count';
+export const PEER_MANAGER_LOW_SCORE_DISCONNECTS = 'aztec.peer_manager.low_score_disconnects';
+export const P2P_PEER_STATE_COUNT = 'aztec.p2p.peer_state_count';
 
 export const P2P_REQ_RESP_SENT_REQUESTS = 'aztec.p2p.req_resp.sent_requests';
 export const P2P_REQ_RESP_RECEIVED_REQUESTS = 'aztec.p2p.req_resp.received_requests';
@@ -121,6 +123,8 @@ export const P2P_REQ_RESP_FAILED_INBOUND_REQUESTS = 'aztec.p2p.req_resp.failed_i
 export const P2P_GOSSIP_MESSAGE_VALIDATION_DURATION = 'aztec.p2p.gossip.message_validation_duration';
 export const P2P_GOSSIP_MESSAGE_PREVALIDATION_COUNT = 'aztec.p2p.gossip.message_validation_count';
 export const P2P_GOSSIP_MESSAGE_LATENCY = 'aztec.p2p.gossip.message_latency';
+export const P2P_GOSSIP_APP_PEER_SCORE = 'aztec.p2p.gossip.app_peer_score';
+export const P2P_GOSSIP_GSUB_PEER_SCORE = 'aztec.p2p.gossip.gsub_peer_score';
 
 export const P2P_GOSSIP_AGG_MESSAGE_LATENCY_MIN = 'aztec.p2p.gossip.agg_message_latency_min';
 export const P2P_GOSSIP_AGG_MESSAGE_LATENCY_MAX = 'aztec.p2p.gossip.agg_message_latency_max';
@@ -133,6 +137,54 @@ export const P2P_GOSSIP_AGG_MESSAGE_VALIDATION_DURATION_MAX = 'aztec.p2p.gossip.
 export const P2P_GOSSIP_AGG_MESSAGE_VALIDATION_DURATION_P50 = 'aztec.p2p.gossip.agg_message_validation_duration_p50';
 export const P2P_GOSSIP_AGG_MESSAGE_VALIDATION_DURATION_P90 = 'aztec.p2p.gossip.agg_message_validation_duration_p90';
 export const P2P_GOSSIP_AGG_MESSAGE_VALIDATION_DURATION_AVG = 'aztec.p2p.gossip.agg_message_validation_duration_avg';
+
+export const P2P_GOSSIP_AGG_PEER_SCORE_APP_MIN = 'aztec.p2p.gossip.agg_peer_score_app_min';
+export const P2P_GOSSIP_AGG_PEER_SCORE_APP_MAX = 'aztec.p2p.gossip.agg_peer_scroe_app_max';
+export const P2P_GOSSIP_AGG_PEER_SCORE_APP_P50 = 'aztec.p2p.gossip.agg_peer_scroe_app_p50';
+export const P2P_GOSSIP_AGG_PEER_SCORE_APP_P90 = 'aztec.p2p.gossip.agg_peer_score_app_p90';
+export const P2P_GOSSIP_AGG_PEER_SCORE_APP_AVG = 'aztec.p2p.gossip.agg_peer_score_app_avg';
+
+export const P2P_GOSSIP_AGG_PEER_SCORE_GSUB_MIN = 'aztec.p2p.gossip.agg_peer_score_gsub_min';
+export const P2P_GOSSIP_AGG_PEER_SCORE_GSUB_MAX = 'aztec.p2p.gossip.agg_peer_scroe_gsub_max';
+export const P2P_GOSSIP_AGG_PEER_SCORE_GSUB_P50 = 'aztec.p2p.gossip.agg_peer_scroe_gsub_p50';
+export const P2P_GOSSIP_AGG_PEER_SCORE_GSUB_P90 = 'aztec.p2p.gossip.agg_peer_score_gsub_p90';
+export const P2P_GOSSIP_AGG_PEER_SCORE_GSUB_AVG = 'aztec.p2p.gossip.agg_peer_score_gsub_avg';
+
+export const P2P_GOSSIP_AGG_SCORE_P1_MIN = 'aztec.p2p.gossip.agg_score_p1_min';
+export const P2P_GOSSIP_AGG_SCORE_P1_MAX = 'aztec.p2p.gossip.agg_score_p1_max';
+export const P2P_GOSSIP_AGG_SCORE_P1_P50 = 'aztec.p2p.gossip.agg_score_p1_p50';
+export const P2P_GOSSIP_AGG_SCORE_P1_P90 = 'aztec.p2p.gossip.agg_score_p1_p90';
+export const P2P_GOSSIP_AGG_SCORE_P1_AVG = 'aztec.p2p.gossip.agg_score_p1_avg';
+
+export const P2P_GOSSIP_AGG_SCORE_P2_MIN = 'aztec.p2p.gossip.agg_score_p2_min';
+export const P2P_GOSSIP_AGG_SCORE_P2_MAX = 'aztec.p2p.gossip.agg_score_p2_max';
+export const P2P_GOSSIP_AGG_SCORE_P2_P50 = 'aztec.p2p.gossip.agg_score_p2_p50';
+export const P2P_GOSSIP_AGG_SCORE_P2_P90 = 'aztec.p2p.gossip.agg_score_p2_p90';
+export const P2P_GOSSIP_AGG_SCORE_P2_AVG = 'aztec.p2p.gossip.agg_score_p2_avg';
+
+export const P2P_GOSSIP_AGG_SCORE_P3_MIN = 'aztec.p2p.gossip.agg_score_p3_min';
+export const P2P_GOSSIP_AGG_SCORE_P3_MAX = 'aztec.p2p.gossip.agg_score_p3_max';
+export const P2P_GOSSIP_AGG_SCORE_P3_P50 = 'aztec.p2p.gossip.agg_score_p3_p50';
+export const P2P_GOSSIP_AGG_SCORE_P3_P90 = 'aztec.p2p.gossip.agg_score_p3_p90';
+export const P2P_GOSSIP_AGG_SCORE_P3_AVG = 'aztec.p2p.gossip.agg_score_p3_avg';
+
+export const P2P_GOSSIP_AGG_SCORE_P3B_MIN = 'aztec.p2p.gossip.agg_score_p3b_min';
+export const P2P_GOSSIP_AGG_SCORE_P3B_MAX = 'aztec.p2p.gossip.agg_score_p3b_max';
+export const P2P_GOSSIP_AGG_SCORE_P3B_P50 = 'aztec.p2p.gossip.agg_score_p3b_p50';
+export const P2P_GOSSIP_AGG_SCORE_P3B_P90 = 'aztec.p2p.gossip.agg_score_p3b_p90';
+export const P2P_GOSSIP_AGG_SCORE_P3B_AVG = 'aztec.p2p.gossip.agg_score_p3b_avg';
+
+export const P2P_GOSSIP_AGG_SCORE_P4_MIN = 'aztec.p2p.gossip.agg_score_p4_min';
+export const P2P_GOSSIP_AGG_SCORE_P4_MAX = 'aztec.p2p.gossip.agg_score_p4_max';
+export const P2P_GOSSIP_AGG_SCORE_P4_P50 = 'aztec.p2p.gossip.agg_score_p4_p50';
+export const P2P_GOSSIP_AGG_SCORE_P4_P90 = 'aztec.p2p.gossip.agg_score_p4_p90';
+export const P2P_GOSSIP_AGG_SCORE_P4_AVG = 'aztec.p2p.gossip.agg_score_p4_avg';
+
+export const P2P_GOSSIP_AGG_SCORE_TOTAL_MIN = 'aztec.p2p.gossip.agg_score_total_min';
+export const P2P_GOSSIP_AGG_SCORE_TOTAL_MAX = 'aztec.p2p.gossip.agg_score_total_max';
+export const P2P_GOSSIP_AGG_SCORE_TOTAL_P50 = 'aztec.p2p.gossip.agg_score_total_p50';
+export const P2P_GOSSIP_AGG_SCORE_TOTAL_P90 = 'aztec.p2p.gossip.agg_score_total_p90';
+export const P2P_GOSSIP_AGG_SCORE_TOTAL_AVG = 'aztec.p2p.gossip.agg_score_total_avg';
 
 export const PUBLIC_PROCESSOR_TX_DURATION = 'aztec.public_processor.tx_duration';
 export const PUBLIC_PROCESSOR_TX_COUNT = 'aztec.public_processor.tx_count';

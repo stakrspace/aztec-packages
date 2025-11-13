@@ -395,7 +395,7 @@ export class LibP2PService<T extends P2PClientType = P2PClientType.Full> extends
       logger: createLibp2pComponentLogger(logger.module),
     });
 
-    const peerScoring = new PeerScoring(config);
+    const peerScoring = new PeerScoring(config, telemetry);
     const reqresp = new ReqResp(config, node, peerScoring, createLogger(`${logger.module}:reqresp`));
 
     const peerManager = new PeerManager(
@@ -490,9 +490,12 @@ export class LibP2PService<T extends P2PClientType = P2PClientType.Full> extends
     // add GossipSub listener
     this.node.services.pubsub.addEventListener(GossipSubEvent.MESSAGE, this.gossipSubEventHandler);
 
-    // Start running promise for peer discovery
+    // Start running promise for peer discovery and metrics collection
     this.discoveryRunningPromise = new RunningPromise(
-      () => this.peerManager.heartbeat(),
+      async () => {
+        await this.peerManager.heartbeat();
+        this.updateGossipsubScoreMetrics();
+      },
       this.logger,
       this.config.peerCheckIntervalMS,
     );
@@ -1248,6 +1251,33 @@ export class LibP2PService<T extends P2PClientType = P2PClientType.Full> extends
       p2pMessageIdentifier: identifier,
       sourcePeer: this.node.peerId.toString(),
     });
+  }
+
+  /**
+   * Collects total gossipsub scores for all connected peers and updates metrics.
+   * This provides visibility into the aggregate gossipsub scoring behavior.
+   *
+   * Note: Detailed score components (p1, p2, p3, p3b, p4) are internal to gossipsub
+   * and not exposed through the public API in the current libp2p version.
+   */
+  private updateGossipsubScoreMetrics(): void {
+    try {
+      // Get all connected peers from the peer manager
+      const peers = this.peerManager.getPeers();
+      const scores: number[] = [];
+
+      for (const peer of peers) {
+        if (peer.status === 'connected') {
+          // Get the total gossipsub score for this peer
+          const score = this.node.services.pubsub.score.score(peer.id);
+          scores.push(score);
+        }
+      }
+
+      this.instrumentation.updateGossipsubScores(scores);
+    } catch (err) {
+      this.logger.debug(`Error updating gossipsub score metrics: ${err}`);
+    }
   }
 
   // Libp2p seems to hang sometimes if new peers are initiating connections.

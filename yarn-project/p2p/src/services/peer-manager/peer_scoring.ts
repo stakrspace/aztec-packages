@@ -1,8 +1,18 @@
 import { median } from '@aztec/foundation/collection';
 import { createLogger } from '@aztec/foundation/log';
 import { PeerErrorSeverity } from '@aztec/stdlib/p2p';
+import {
+  Attributes,
+  type BatchObservableResult,
+  Metrics,
+  type ObservableGauge,
+  type TelemetryClient,
+  type UpDownCounter,
+  ValueType,
+} from '@aztec/telemetry-client';
 
 import type { PeerId } from '@libp2p/interface';
+import { type RecordableHistogram, createHistogram } from 'node:perf_hooks';
 
 import type { P2PConfig } from '../../config.js';
 
@@ -30,7 +40,11 @@ export class PeerScoring {
   private decayFactor = 0.9;
   peerPenalties: { [key in PeerErrorSeverity]: number };
 
-  constructor(config: P2PConfig) {
+  private aggScoreHistogram: RecordableHistogram;
+  private aggScoreMetrics: Record<'min' | 'max' | 'p50' | 'p90' | 'avg', ObservableGauge>;
+  private peerStateCounter: UpDownCounter;
+
+  constructor(config: P2PConfig, telemetry?: TelemetryClient) {
     const orderedValues = config.peerPenaltyValues?.sort((a, b) => a - b);
     this.peerPenalties = {
       [PeerErrorSeverity.HighToleranceError]:
@@ -40,6 +54,47 @@ export class PeerScoring {
       [PeerErrorSeverity.LowToleranceError]:
         orderedValues?.[2] ?? DefaultPeerPenalties[PeerErrorSeverity.LowToleranceError],
     };
+
+    // Initialize aggregate score histogram with range from -1000 to +1000
+    this.aggScoreHistogram = createHistogram({ min: -1000, max: 1000 });
+
+    if (telemetry) {
+      const meter = telemetry.getMeter('PeerScoring');
+
+      this.aggScoreMetrics = {
+        avg: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_PEER_SCORE_APP_AVG, {
+          valueType: ValueType.DOUBLE,
+          description: 'Average application peer score',
+        }),
+        max: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_PEER_SCORE_APP_MAX, {
+          valueType: ValueType.DOUBLE,
+          description: 'Maximum application peer score',
+        }),
+        min: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_PEER_SCORE_APP_MIN, {
+          valueType: ValueType.DOUBLE,
+          description: 'Minimum application peer score',
+        }),
+        p50: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_PEER_SCORE_APP_P50, {
+          valueType: ValueType.DOUBLE,
+          description: 'P50 application peer score',
+        }),
+        p90: meter.createObservableGauge(Metrics.P2P_GOSSIP_AGG_PEER_SCORE_APP_P90, {
+          valueType: ValueType.DOUBLE,
+          description: 'P90 application peer score',
+        }),
+      };
+
+      this.peerStateCounter = meter.createUpDownCounter(Metrics.P2P_PEER_STATE_COUNT, {
+        description: 'Count of peers by state (Healthy, Disconnect, Banned)',
+        valueType: ValueType.INT,
+      });
+
+      meter.addBatchObservableCallback(this.observeAggregateScores, Object.values(this.aggScoreMetrics));
+    } else {
+      // Create no-op metrics if telemetry is not provided
+      this.aggScoreMetrics = {} as any;
+      this.peerStateCounter = { add: () => {} } as any;
+    }
   }
 
   public penalizePeer(peerId: PeerId, penalty: PeerErrorSeverity) {
@@ -81,7 +136,34 @@ export class PeerScoring {
         this.lastUpdateTime.set(peerId, currentTime);
       }
     }
+
+    // Update aggregate histogram after decay
+    this.updateAggregateScores();
   }
+
+  private updateAggregateScores(): void {
+    // Reset the histogram
+    this.aggScoreHistogram.reset();
+
+    // Record all current scores
+    for (const score of this.scores.values()) {
+      // Clamp score to histogram range and ensure it's at least 1 for the histogram
+      const clampedScore = Math.max(-1000, Math.min(1000, score));
+      this.aggScoreHistogram.record(clampedScore);
+    }
+  }
+
+  private observeAggregateScores = (res: BatchObservableResult) => {
+    if (this.aggScoreHistogram.count === 0) {
+      return;
+    }
+
+    res.observe(this.aggScoreMetrics.avg, this.aggScoreHistogram.mean);
+    res.observe(this.aggScoreMetrics.max, this.aggScoreHistogram.max);
+    res.observe(this.aggScoreMetrics.min, this.aggScoreHistogram.min);
+    res.observe(this.aggScoreMetrics.p50, this.aggScoreHistogram.percentile(50));
+    res.observe(this.aggScoreMetrics.p90, this.aggScoreHistogram.percentile(90));
+  };
 
   getScore(peerId: string): number {
     return this.scores.get(peerId) || 0;
@@ -99,7 +181,34 @@ export class PeerScoring {
     return PeerScoreState.Healthy;
   }
 
-  getStats(): { medianScore: number } {
-    return { medianScore: median(Array.from(this.scores.values())) ?? 0 };
+  getStats(): { medianScore: number; healthyCount: number; disconnectCount: number; bannedCount: number } {
+    const stateCounts = { healthy: 0, disconnect: 0, banned: 0 };
+
+    for (const peerId of this.scores.keys()) {
+      const state = this.getScoreState(peerId);
+      switch (state) {
+        case PeerScoreState.Healthy:
+          stateCounts.healthy++;
+          break;
+        case PeerScoreState.Disconnect:
+          stateCounts.disconnect++;
+          break;
+        case PeerScoreState.Banned:
+          stateCounts.banned++;
+          break;
+      }
+    }
+
+    // Update the counter metrics
+    this.peerStateCounter.add(stateCounts.healthy, { [Attributes.P2P_PEER_SCORE_STATE]: 'Healthy' });
+    this.peerStateCounter.add(stateCounts.disconnect, { [Attributes.P2P_PEER_SCORE_STATE]: 'Disconnect' });
+    this.peerStateCounter.add(stateCounts.banned, { [Attributes.P2P_PEER_SCORE_STATE]: 'Banned' });
+
+    return {
+      medianScore: median(Array.from(this.scores.values())) ?? 0,
+      healthyCount: stateCounts.healthy,
+      disconnectCount: stateCounts.disconnect,
+      bannedCount: stateCounts.banned,
+    };
   }
 }
