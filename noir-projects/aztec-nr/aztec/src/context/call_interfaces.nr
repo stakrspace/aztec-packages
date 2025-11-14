@@ -8,14 +8,6 @@ use crate::context::{gas::GasOpts, private_context::PrivateContext, public_conte
 use crate::hash::{hash_args, hash_calldata};
 use crate::oracle::execution_cache;
 
-pub trait CallInterface<let N: u32> {
-    fn get_args(self) -> [Field];
-    fn get_selector(self) -> FunctionSelector;
-    fn get_name(self) -> str<N>;
-    fn get_contract_address(self) -> AztecAddress;
-    fn get_is_static(self) -> bool;
-}
-
 // PrivateCallInterface
 
 #[must_use = "Your private call needs to be passed into the `self.call(...)` method to be executed (e.g. `self.call(MyContract::at(address).my_private_function(...args))`"]
@@ -29,10 +21,7 @@ pub struct PrivateCallInterface<let M: u32, T> {
     is_static: bool,
 }
 
-impl<let M: u32, T> PrivateCallInterface<M, T>
-where
-    T: Deserialize,
-{
+impl<let M: u32, T> PrivateCallInterface<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,
@@ -52,6 +41,31 @@ where
         }
     }
 
+    pub fn args(self) -> [Field] {
+        self.args
+    }
+
+    pub fn selector(self) -> FunctionSelector {
+        self.selector
+    }
+
+    pub fn name(self) -> str<M> {
+        self.name
+    }
+
+    pub fn contract_address(self) -> AztecAddress {
+        self.target_contract
+    }
+
+    pub fn is_static(self) -> bool {
+        self.is_static
+    }
+}
+
+impl<let M: u32, T> PrivateCallInterface<M, T>
+where
+    T: Deserialize,
+{
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.call(MyContract::at(address).my_private_function(...args))`
@@ -68,28 +82,6 @@ where
         // If T is () (i.e. if the function does not return anything) then `get_preimage` will constrain that the
         // returns hash is empty as per the protocol rules.
         returns_hash.get_preimage()
-    }
-}
-
-impl<let M: u32, T> CallInterface<M> for PrivateCallInterface<M, T> {
-    fn get_args(self) -> [Field] {
-        self.args
-    }
-
-    fn get_selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    fn get_name(self) -> str<M> {
-        self.name
-    }
-
-    fn get_contract_address(self) -> AztecAddress {
-        self.target_contract
-    }
-
-    fn get_is_static(self) -> bool {
-        self.is_static
     }
 }
 
@@ -142,26 +134,24 @@ impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
         );
         returns.get_preimage()
     }
-}
 
-impl<let M: u32, T> CallInterface<M> for PrivateStaticCallInterface<M, T> {
-    fn get_args(self) -> [Field] {
+    pub fn args(self) -> [Field] {
         self.args
     }
 
-    fn get_selector(self) -> FunctionSelector {
+    pub fn selector(self) -> FunctionSelector {
         self.selector
     }
 
-    fn get_name(self) -> str<M> {
+    pub fn name(self) -> str<M> {
         self.name
     }
 
-    fn get_contract_address(self) -> AztecAddress {
+    pub fn contract_address(self) -> AztecAddress {
         self.target_contract
     }
 
-    fn get_is_static(self) -> bool {
+    pub fn is_static(self) -> bool {
         self.is_static
     }
 }
@@ -180,10 +170,7 @@ pub struct PublicCallInterface<let M: u32, T> {
     is_static: bool,
 }
 
-impl<let M: u32, T> PublicCallInterface<M, T>
-where
-    T: Deserialize,
-{
+impl<let M: u32, T> PublicCallInterface<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,
@@ -207,11 +194,34 @@ where
         self
     }
 
+    pub fn args(self) -> [Field] {
+        self.args
+    }
+
+    pub fn selector(self) -> FunctionSelector {
+        self.selector
+    }
+
+    pub fn name(self) -> str<M> {
+        self.name
+    }
+
+    pub fn contract_address(self) -> AztecAddress {
+        self.target_contract
+    }
+
+    pub fn is_static(self) -> bool {
+        self.is_static
+    }
+
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.call(MyContract::at(address).my_public_function(...args))`
     /// instead of manually constructing and calling `PublicCallInterface`.
-    pub unconstrained fn call(self, context: PublicContext) -> T {
+    pub unconstrained fn call(self, context: PublicContext) -> T
+    where
+        T: Deserialize,
+    {
         let returns = context.call_public_function(
             self.target_contract,
             self.selector,
@@ -285,28 +295,6 @@ where
     }
 }
 
-impl<let M: u32, T> CallInterface<M> for PublicCallInterface<M, T> {
-    fn get_args(self) -> [Field] {
-        self.args
-    }
-
-    fn get_selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    fn get_name(self) -> str<M> {
-        self.name
-    }
-
-    fn get_contract_address(self) -> AztecAddress {
-        self.target_contract
-    }
-
-    fn get_is_static(self) -> bool {
-        self.is_static
-    }
-}
-
 // PublicStaticCallInterface
 
 #[must_use = "Your public static call needs to be passed into the `self.view(...)`, `self.enqueue_view(...)` or `self.enqueue_view_incognito(...)` method to be executed (e.g. `self.view(MyContract::at(address).my_public_static_function(...args))`"]
@@ -320,10 +308,7 @@ pub struct PublicStaticCallInterface<let M: u32, T> {
     gas_opts: GasOpts,
 }
 
-impl<let M: u32, T> PublicStaticCallInterface<M, T>
-where
-    T: Deserialize,
-{
+impl<let M: u32, T> PublicStaticCallInterface<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,
@@ -346,11 +331,34 @@ where
         self
     }
 
+    pub fn args(self) -> [Field] {
+        self.args
+    }
+
+    pub fn selector(self) -> FunctionSelector {
+        self.selector
+    }
+
+    pub fn name(self) -> str<M> {
+        self.name
+    }
+
+    pub fn contract_address(self) -> AztecAddress {
+        self.target_contract
+    }
+
+    pub fn is_static(self) -> bool {
+        self.is_static
+    }
+
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.view(MyContract::at(address).my_public_static_function(...args))`
     /// instead of manually constructing and calling `PublicStaticCallInterface`.
-    pub unconstrained fn view(self, context: PublicContext) -> T {
+    pub unconstrained fn view(self, context: PublicContext) -> T
+    where
+        T: Deserialize,
+    {
         let returns = context.static_call_public_function(
             self.target_contract,
             self.selector,
@@ -395,28 +403,6 @@ where
     }
 }
 
-impl<let M: u32, T> CallInterface<M> for PublicStaticCallInterface<M, T> {
-    fn get_args(self) -> [Field] {
-        self.args
-    }
-
-    fn get_selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    fn get_name(self) -> str<M> {
-        self.name
-    }
-
-    fn get_contract_address(self) -> AztecAddress {
-        self.target_contract
-    }
-
-    fn get_is_static(self) -> bool {
-        self.is_static
-    }
-}
-
 // UtilityCallInterface
 
 pub struct UtilityCallInterface<let M: u32, T> {
@@ -426,28 +412,6 @@ pub struct UtilityCallInterface<let M: u32, T> {
     args_hash: Field,
     args: [Field],
     return_type: T,
-}
-
-impl<let M: u32, T> CallInterface<M> for UtilityCallInterface<M, T> {
-    fn get_args(self) -> [Field] {
-        self.args
-    }
-
-    fn get_selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    fn get_name(self) -> str<M> {
-        self.name
-    }
-
-    fn get_contract_address(self) -> AztecAddress {
-        self.target_contract
-    }
-
-    fn get_is_static(self) -> bool {
-        false
-    }
 }
 
 impl<let M: u32, T> UtilityCallInterface<M, T> {
@@ -461,19 +425,23 @@ impl<let M: u32, T> UtilityCallInterface<M, T> {
         Self { target_contract, selector, name, args_hash, args, return_type: std::mem::zeroed() }
     }
 
-    pub fn get_args(self) -> [Field] {
+    pub fn args(self) -> [Field] {
         self.args
     }
 
-    pub fn get_selector(self) -> FunctionSelector {
+    pub fn selector(self) -> FunctionSelector {
         self.selector
     }
 
-    pub fn get_name(self) -> str<M> {
+    pub fn name(self) -> str<M> {
         self.name
     }
 
-    pub fn get_contract_address(self) -> AztecAddress {
+    pub fn contract_address(self) -> AztecAddress {
         self.target_contract
+    }
+
+    pub fn is_static(self) -> bool {
+        false
     }
 }

@@ -6,9 +6,8 @@ use protocol_types::{
 
 use crate::{
     context::{
-        call_interfaces::CallInterface, PrivateCallInterface, PrivateContext,
-        PrivateStaticCallInterface, PublicCallInterface, PublicContext, PublicStaticCallInterface,
-        UtilityCallInterface, UtilityContext,
+        PrivateCallInterface, PrivateContext, PrivateStaticCallInterface, PublicCallInterface,
+        PublicContext, PublicStaticCallInterface, UtilityCallInterface, UtilityContext,
     },
     hash::hash_args,
     messages::{
@@ -504,16 +503,16 @@ impl TestEnvironment {
     where
         T: Deserialize,
     {
-        let args = call_interface.get_args();
+        let args = call_interface.args();
         let args_hash = hash_args(args);
 
         let serialized_return_values = txe_oracles::private_call_new_flow(
             from,
-            call_interface.get_contract_address(),
-            call_interface.get_selector(),
+            call_interface.contract_address(),
+            call_interface.selector(),
             args,
             args_hash,
-            call_interface.get_is_static(),
+            call_interface.is_static(),
         );
 
         T::deserialize(serialized_return_values)
@@ -530,16 +529,16 @@ impl TestEnvironment {
     where
         T: Deserialize,
     {
-        let args = call_interface.get_args();
+        let args = call_interface.args();
         let args_hash = hash_args(args);
 
         let serialized_return_values = txe_oracles::private_call_new_flow(
             std::mem::zeroed(), // The 'from' address is currently not manually set
-            call_interface.get_contract_address(),
-            call_interface.get_selector(),
+            call_interface.contract_address(),
+            call_interface.selector(),
             args,
             args_hash,
-            call_interface.get_is_static(),
+            call_interface.is_static(),
         );
 
         T::deserialize(serialized_return_values)
@@ -562,9 +561,9 @@ impl TestEnvironment {
         T: Deserialize,
     {
         let serialized_return_values = txe_oracles::simulate_utility_function(
-            call_interface.get_contract_address(),
-            call_interface.get_selector(),
-            call_interface.get_args(),
+            call_interface.contract_address(),
+            call_interface.selector(),
+            call_interface.args(),
         );
 
         T::deserialize(serialized_return_values)
@@ -598,9 +597,9 @@ impl TestEnvironment {
     {
         let serialized_return_values = txe_oracles::public_call_new_flow(
             Option::some(from),
-            call_interface.get_contract_address(),
-            call_interface.get_selector(),
-            call_interface.get_args(),
+            call_interface.contract_address(),
+            call_interface.selector(),
+            call_interface.args(),
             false,
         );
         T::deserialize(serialized_return_values)
@@ -619,9 +618,9 @@ impl TestEnvironment {
     {
         let serialized_return_values = txe_oracles::public_call_new_flow(
             Option::some(from),
-            call_interface.get_contract_address(),
-            call_interface.get_selector(),
-            call_interface.get_args(),
+            call_interface.contract_address(),
+            call_interface.selector(),
+            call_interface.args(),
             false,
         );
 
@@ -641,9 +640,9 @@ impl TestEnvironment {
     {
         let serialized_return_values = txe_oracles::public_call_new_flow(
             Option::some(AztecAddress::zero()),
-            call_interface.get_contract_address(),
-            call_interface.get_selector(),
-            call_interface.get_args(),
+            call_interface.contract_address(),
+            call_interface.selector(),
+            call_interface.args(),
             true,
         );
 
@@ -663,9 +662,9 @@ impl TestEnvironment {
     {
         let serialized_return_values = txe_oracles::public_call_new_flow(
             Option::none(),
-            call_interface.get_contract_address(),
-            call_interface.get_selector(),
-            call_interface.get_args(),
+            call_interface.contract_address(),
+            call_interface.selector(),
+            call_interface.args(),
             true,
         );
 

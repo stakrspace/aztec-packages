@@ -1,6 +1,6 @@
 use crate::{
     authwit::auth::{compute_authwit_message_hash, compute_inner_authwit_hash},
-    context::call_interfaces::{CallInterface, PublicCallInterface},
+    context::{PrivateCallInterface, PublicCallInterface},
     hash::hash_args,
     test::helpers::{test_environment::TestEnvironment, txe_oracles},
 };
@@ -10,15 +10,12 @@ use protocol_types::{
     constants::CANONICAL_AUTH_REGISTRY_ADDRESS, traits::ToField,
 };
 
-pub unconstrained fn add_private_authwit_from_call_interface<C, let M: u32>(
+pub unconstrained fn add_private_authwit_from_call_interface<T, let M: u32>(
     env: TestEnvironment,
     on_behalf_of: AztecAddress,
     caller: AztecAddress,
-    call_interface: C,
-)
-where
-    C: CallInterface<M>,
-{
+    call_interface: PrivateCallInterface<M, T>,
+) {
     // The creation of this utility context results in the TXE session needing to keep track of authwits over its
     // lifetime, as we'd otherwise be unable to store more than one authwit due to them getting reset when restoring the
     // top-level TXE context.
@@ -26,30 +23,27 @@ where
     let (chain_id, version) =
         env.utility_context(|context| (context.chain_id(), context.version()));
 
-    let target = call_interface.get_contract_address();
-    let args_hash = hash_args(call_interface.get_args());
-    let selector = call_interface.get_selector();
+    let target = call_interface.contract_address();
+    let args_hash = hash_args(call_interface.args());
+    let selector = call_interface.selector();
     let inner_hash =
         compute_inner_authwit_hash([caller.to_field(), selector.to_field(), args_hash]);
     let message_hash = compute_authwit_message_hash(target, chain_id, version, inner_hash);
     txe_oracles::add_authwit(on_behalf_of, message_hash);
 }
 
-pub unconstrained fn add_public_authwit_from_call_interface<C, let M: u32>(
+pub unconstrained fn add_public_authwit_from_call_interface<T, let M: u32>(
     env: TestEnvironment,
     on_behalf_of: AztecAddress,
     caller: AztecAddress,
-    call_interface: C,
-)
-where
-    C: CallInterface<M>,
-{
+    call_interface: PublicCallInterface<M, T>,
+) {
     let (chain_id, version) =
         env.utility_context(|context| (context.chain_id(), context.version()));
 
-    let target = call_interface.get_contract_address();
-    let args_hash = hash_args(call_interface.get_args());
-    let selector = call_interface.get_selector();
+    let target = call_interface.contract_address();
+    let args_hash = hash_args(call_interface.args());
+    let selector = call_interface.selector();
     let inner_hash =
         compute_inner_authwit_hash([caller.to_field(), selector.to_field(), args_hash]);
     let message_hash = compute_authwit_message_hash(target, chain_id, version, inner_hash);

@@ -1,5 +1,5 @@
 use crate::{
-    context::call_interfaces::{CallInterface, PrivateCallInterface, PublicCallInterface},
+    context::{PrivateCallInterface, PublicCallInterface},
     test::helpers::{test_environment::TestEnvironment, txe_oracles},
 };
 use protocol_types::{
@@ -44,8 +44,8 @@ impl<let N: u32> ContractDeployment<N> {
     {
         let instance = txe_oracles::deploy(
             self.path,
-            initializer_call.get_name(),
-            initializer_call.get_args(),
+            initializer_call.name(),
+            initializer_call.args(),
             self.secret,
         );
 
@@ -58,10 +58,10 @@ impl<let N: u32> ContractDeployment<N> {
             from,
             PrivateCallInterface::new(
                 instance.to_address(),
-                initializer_call.get_selector(),
-                initializer_call.get_name(),
-                initializer_call.get_args(),
-                initializer_call.get_is_static(),
+                initializer_call.selector(),
+                initializer_call.name(),
+                initializer_call.args(),
+                initializer_call.is_static(),
             ),
         );
 
@@ -96,8 +96,8 @@ impl<let N: u32> ContractDeployment<N> {
     {
         let instance = txe_oracles::deploy(
             self.path,
-            initializer_call.get_name(),
-            initializer_call.get_args(),
+            initializer_call.name(),
+            initializer_call.args(),
             self.secret,
         );
 
@@ -110,10 +110,10 @@ impl<let N: u32> ContractDeployment<N> {
             from,
             PublicCallInterface::new(
                 instance.to_address(),
-                initializer_call.get_selector(),
-                initializer_call.get_name(),
-                initializer_call.get_args(),
-                initializer_call.get_is_static(),
+                initializer_call.selector(),
+                initializer_call.name(),
+                initializer_call.args(),
+                initializer_call.is_static(),
             ),
         );
 
