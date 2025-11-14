@@ -67,7 +67,7 @@ TxExecutionResult TxExecution::simulate(const Tx& tx)
     std::optional<std::vector<FF>> app_logic_return_value;
 
     events.emit(TxStartupEvent{
-        .state = tx_context.serialize_tx_context_event(),
+        .gas_used = tx_context.gas_used,
         .gas_limit = gas_limit,
         .teardown_gas_limit = teardown_gas_limit,
         .phase_lengths = PhaseLengths::from_tx(tx), // extract lengths of each phase at start
