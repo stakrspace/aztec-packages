@@ -55,7 +55,6 @@ pub unconstrained fn add_public_authwit_from_call_interface<T, let M: u32>(
             comptime { FunctionSelector::from_signature("set_authorized(Field,bool)") },
             "set_authorized",
             [message_hash, true as Field].as_slice(),
-            false,
         ),
     );
 }

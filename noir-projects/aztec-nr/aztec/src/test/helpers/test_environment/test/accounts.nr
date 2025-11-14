@@ -67,7 +67,6 @@ unconstrained fn light_accounts_fail_on_private_authwit_checks() {
             comptime { FunctionSelector::from_signature("verify_private_authwit(Field)") },
             "verify_private_authwit",
             [inner_hash],
-            true,
         ),
     );
 }
@@ -87,7 +86,6 @@ unconstrained fn contract_accounts_reject_invalid_private_authwits() {
             comptime { FunctionSelector::from_signature("verify_private_authwit(Field)") },
             "verify_private_authwit",
             [inner_hash],
-            true,
         ),
     );
 }
@@ -113,7 +111,6 @@ unconstrained fn contract_accounts_accept_valid_private_authwits() {
             comptime { FunctionSelector::from_signature("verify_private_authwit(Field)") },
             "verify_private_authwit",
             [inner_hash],
-            true,
         ),
     );
     assert_eq(result, IS_VALID_SELECTOR);

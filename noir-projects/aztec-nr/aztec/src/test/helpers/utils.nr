@@ -61,7 +61,6 @@ impl<let N: u32> ContractDeployment<N> {
                 initializer_call.selector(),
                 initializer_call.name(),
                 initializer_call.args(),
-                initializer_call.is_static(),
             ),
         );
 
@@ -113,7 +112,6 @@ impl<let N: u32> ContractDeployment<N> {
                 initializer_call.selector(),
                 initializer_call.name(),
                 initializer_call.args(),
-                initializer_call.is_static(),
             ),
         );
 

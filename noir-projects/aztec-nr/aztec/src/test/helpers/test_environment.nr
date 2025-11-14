@@ -403,7 +403,6 @@ impl TestEnvironment {
                 comptime { FunctionSelector::from_signature("constructor(Field,Field)") },
                 "constructor",
                 [test_account.keys.ivpk_m.inner.x, test_account.keys.ivpk_m.inner.y],
-                false,
             ),
         );
 
@@ -512,7 +511,7 @@ impl TestEnvironment {
             call_interface.selector(),
             args,
             args_hash,
-            call_interface.is_static(),
+            /*is_static=*/ false,
         );
 
         T::deserialize(serialized_return_values)
@@ -538,7 +537,7 @@ impl TestEnvironment {
             call_interface.selector(),
             args,
             args_hash,
-            call_interface.is_static(),
+            /*is_static=*/ true,
         );
 
         T::deserialize(serialized_return_values)

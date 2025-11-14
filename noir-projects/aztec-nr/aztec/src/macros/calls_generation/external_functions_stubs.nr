@@ -70,7 +70,6 @@ pub(crate) comptime fn create_private_stub(f: FunctionDefinition) -> Quoted {
                 selector,
                 $fn_name_str,
                 $serialized_args_array_name,
-                false
             )
         }
     }
@@ -109,7 +108,6 @@ pub(crate) comptime fn create_public_stub(f: FunctionDefinition) -> Quoted {
                 selector,
                 $fn_name_str,
                 $serialized_args_array_name,
-                false
             )
         }
     }
@@ -205,7 +203,6 @@ pub comptime fn create_public_self_call_stub(f: FunctionDefinition) -> Quoted {
                     selector,
                     $fn_name_str,
                     $serialized_args_array_name,
-                    false
                 ).call(self.context)
             }
         }
@@ -268,7 +265,6 @@ pub comptime fn create_public_self_enqueue_stub(f: FunctionDefinition) -> Quoted
                 selector,
                 $fn_name_str,
                 $serialized_args_array_name,
-                false
             );
             interface.enqueue(self.context);
         }

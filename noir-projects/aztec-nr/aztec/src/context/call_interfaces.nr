@@ -18,7 +18,6 @@ pub struct PrivateCallInterface<let M: u32, T> {
     args_hash: Field,
     args: [Field],
     return_type: T,
-    is_static: bool,
 }
 
 impl<let M: u32, T> PrivateCallInterface<M, T> {
@@ -27,18 +26,9 @@ impl<let M: u32, T> PrivateCallInterface<M, T> {
         selector: FunctionSelector,
         name: str<M>,
         args: [Field],
-        is_static: bool,
     ) -> Self {
         let args_hash = hash_args(args);
-        Self {
-            target_contract,
-            selector,
-            name,
-            args_hash,
-            args,
-            return_type: std::mem::zeroed(),
-            is_static,
-        }
+        Self { target_contract, selector, name, args_hash, args, return_type: std::mem::zeroed() }
     }
 
     pub fn args(self) -> [Field] {
@@ -55,10 +45,6 @@ impl<let M: u32, T> PrivateCallInterface<M, T> {
 
     pub fn contract_address(self) -> AztecAddress {
         self.target_contract
-    }
-
-    pub fn is_static(self) -> bool {
-        self.is_static
     }
 }
 
@@ -95,7 +81,6 @@ pub struct PrivateStaticCallInterface<let M: u32, T> {
     args_hash: Field,
     args: [Field],
     return_type: T,
-    is_static: bool,
 }
 
 impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
@@ -106,15 +91,7 @@ impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
         args: [Field],
     ) -> Self {
         let args_hash = hash_args(args);
-        Self {
-            target_contract,
-            selector,
-            name,
-            args_hash,
-            args,
-            return_type: std::mem::zeroed(),
-            is_static: true,
-        }
+        Self { target_contract, selector, name, args_hash, args, return_type: std::mem::zeroed() }
     }
 
     /// **[DEPRECATED]**
@@ -150,10 +127,6 @@ impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
     pub fn contract_address(self) -> AztecAddress {
         self.target_contract
     }
-
-    pub fn is_static(self) -> bool {
-        self.is_static
-    }
 }
 
 // PublicCallInterface
@@ -167,7 +140,6 @@ pub struct PublicCallInterface<let M: u32, T> {
     args: [Field],
     gas_opts: GasOpts,
     return_type: T,
-    is_static: bool,
 }
 
 impl<let M: u32, T> PublicCallInterface<M, T> {
@@ -176,7 +148,6 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
         selector: FunctionSelector,
         name: str<M>,
         args: [Field],
-        is_static: bool,
     ) -> Self {
         Self {
             target_contract,
@@ -185,7 +156,6 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
             args,
             gas_opts: GasOpts::default(),
             return_type: std::mem::zeroed(),
-            is_static,
         }
     }
 
@@ -208,10 +178,6 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
 
     pub fn contract_address(self) -> AztecAddress {
         self.target_contract
-    }
-
-    pub fn is_static(self) -> bool {
-        self.is_static
     }
 
     /// **[DEPRECATED]**
@@ -304,7 +270,6 @@ pub struct PublicStaticCallInterface<let M: u32, T> {
     name: str<M>,
     args: [Field],
     return_type: T,
-    is_static: bool,
     gas_opts: GasOpts,
 }
 
@@ -321,7 +286,6 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
             name,
             args,
             return_type: std::mem::zeroed(),
-            is_static: true,
             gas_opts: GasOpts::default(),
         }
     }
@@ -345,10 +309,6 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
 
     pub fn contract_address(self) -> AztecAddress {
         self.target_contract
-    }
-
-    pub fn is_static(self) -> bool {
-        self.is_static
     }
 
     /// **[DEPRECATED]**
@@ -439,9 +399,5 @@ impl<let M: u32, T> UtilityCallInterface<M, T> {
 
     pub fn contract_address(self) -> AztecAddress {
         self.target_contract
-    }
-
-    pub fn is_static(self) -> bool {
-        false
     }
 }
