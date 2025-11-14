@@ -12,11 +12,11 @@ use crate::oracle::execution_cache;
 
 #[must_use = "Your private call needs to be passed into the `self.call(...)` method to be executed (e.g. `self.call(MyContract::at(address).my_private_function(...args))`"]
 pub struct PrivateCallInterface<let M: u32, T> {
-    target_contract: AztecAddress,
-    selector: FunctionSelector,
-    name: str<M>,
+    pub target_contract: AztecAddress,
+    pub selector: FunctionSelector,
+    pub name: str<M>,
     args_hash: Field,
-    args: [Field],
+    pub args: [Field],
     return_type: T,
 }
 
@@ -29,22 +29,6 @@ impl<let M: u32, T> PrivateCallInterface<M, T> {
     ) -> Self {
         let args_hash = hash_args(args);
         Self { target_contract, selector, name, args_hash, args, return_type: std::mem::zeroed() }
-    }
-
-    pub fn args(self) -> [Field] {
-        self.args
-    }
-
-    pub fn selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    pub fn name(self) -> str<M> {
-        self.name
-    }
-
-    pub fn contract_address(self) -> AztecAddress {
-        self.target_contract
     }
 }
 
@@ -75,11 +59,11 @@ where
 
 #[must_use = "Your private static call needs to be passed into the `self.view(...)` method to be executed (e.g. `self.view(MyContract::at(address).my_private_static_function(...args))`"]
 pub struct PrivateStaticCallInterface<let M: u32, T> {
-    target_contract: AztecAddress,
-    selector: FunctionSelector,
-    name: str<M>,
+    pub target_contract: AztecAddress,
+    pub selector: FunctionSelector,
+    pub name: str<M>,
     args_hash: Field,
-    args: [Field],
+    pub args: [Field],
     return_type: T,
 }
 
@@ -111,33 +95,17 @@ impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
         );
         returns.get_preimage()
     }
-
-    pub fn args(self) -> [Field] {
-        self.args
-    }
-
-    pub fn selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    pub fn name(self) -> str<M> {
-        self.name
-    }
-
-    pub fn contract_address(self) -> AztecAddress {
-        self.target_contract
-    }
 }
 
 // PublicCallInterface
 
 #[must_use = "Your public call needs to be passed into the `self.call(...)`, `self.enqueue(...)` or `self.enqueue_incognito(...)` method to be executed (e.g. `self.call(MyContract::at(address).my_public_function(...args))`"]
 pub struct PublicCallInterface<let M: u32, T> {
-    target_contract: AztecAddress,
-    selector: FunctionSelector,
-    name: str<M>,
+    pub target_contract: AztecAddress,
+    pub selector: FunctionSelector,
+    pub name: str<M>,
     // TODO(F-131): Determine the length at comptime and drop the use of slices.
-    args: [Field],
+    pub args: [Field],
     gas_opts: GasOpts,
     return_type: T,
 }
@@ -162,22 +130,6 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
     pub fn with_gas(mut self, gas_opts: GasOpts) -> Self {
         self.gas_opts = gas_opts;
         self
-    }
-
-    pub fn args(self) -> [Field] {
-        self.args
-    }
-
-    pub fn selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    pub fn name(self) -> str<M> {
-        self.name
-    }
-
-    pub fn contract_address(self) -> AztecAddress {
-        self.target_contract
     }
 
     /// **[DEPRECATED]**
@@ -265,10 +217,10 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
 
 #[must_use = "Your public static call needs to be passed into the `self.view(...)`, `self.enqueue_view(...)` or `self.enqueue_view_incognito(...)` method to be executed (e.g. `self.view(MyContract::at(address).my_public_static_function(...args))`"]
 pub struct PublicStaticCallInterface<let M: u32, T> {
-    target_contract: AztecAddress,
-    selector: FunctionSelector,
-    name: str<M>,
-    args: [Field],
+    pub target_contract: AztecAddress,
+    pub selector: FunctionSelector,
+    pub name: str<M>,
+    pub args: [Field],
     return_type: T,
     gas_opts: GasOpts,
 }
@@ -293,22 +245,6 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
     pub fn with_gas(mut self, gas_opts: GasOpts) -> Self {
         self.gas_opts = gas_opts;
         self
-    }
-
-    pub fn args(self) -> [Field] {
-        self.args
-    }
-
-    pub fn selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    pub fn name(self) -> str<M> {
-        self.name
-    }
-
-    pub fn contract_address(self) -> AztecAddress {
-        self.target_contract
     }
 
     /// **[DEPRECATED]**
@@ -366,11 +302,11 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
 // UtilityCallInterface
 
 pub struct UtilityCallInterface<let M: u32, T> {
-    target_contract: AztecAddress,
-    selector: FunctionSelector,
-    name: str<M>,
+    pub target_contract: AztecAddress,
+    pub selector: FunctionSelector,
+    pub name: str<M>,
     args_hash: Field,
-    args: [Field],
+    pub args: [Field],
     return_type: T,
 }
 
@@ -383,21 +319,5 @@ impl<let M: u32, T> UtilityCallInterface<M, T> {
     ) -> Self {
         let args_hash = hash_args(args);
         Self { target_contract, selector, name, args_hash, args, return_type: std::mem::zeroed() }
-    }
-
-    pub fn args(self) -> [Field] {
-        self.args
-    }
-
-    pub fn selector(self) -> FunctionSelector {
-        self.selector
-    }
-
-    pub fn name(self) -> str<M> {
-        self.name
-    }
-
-    pub fn contract_address(self) -> AztecAddress {
-        self.target_contract
     }
 }

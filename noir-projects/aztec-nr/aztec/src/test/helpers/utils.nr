@@ -42,12 +42,10 @@ impl<let N: u32> ContractDeployment<N> {
     where
         T: Deserialize,
     {
-        let instance = txe_oracles::deploy(
-            self.path,
-            initializer_call.name(),
-            initializer_call.args(),
-            self.secret,
-        );
+        let name = initializer_call.name;
+        let selector = initializer_call.selector;
+        let args = initializer_call.args;
+        let instance = txe_oracles::deploy(self.path, name, args, self.secret);
 
         // initializer_call does not actually have the target_contract value set - it is created with the helper
         // `interface` function created by `generate_contract_interface` in the aztec macros - it represents a call to
@@ -56,12 +54,7 @@ impl<let N: u32> ContractDeployment<N> {
         // We probably want to introduce an intermediate struct to represent this, if we're going to keep this API.
         let _ = self.env.call_private::<T, _>(
             from,
-            PrivateCallInterface::new(
-                instance.to_address(),
-                initializer_call.selector(),
-                initializer_call.name(),
-                initializer_call.args(),
-            ),
+            PrivateCallInterface::new(instance.to_address(), selector, name, args),
         );
 
         instance.to_address()
@@ -93,12 +86,10 @@ impl<let N: u32> ContractDeployment<N> {
     where
         T: Deserialize,
     {
-        let instance = txe_oracles::deploy(
-            self.path,
-            initializer_call.name(),
-            initializer_call.args(),
-            self.secret,
-        );
+        let name = initializer_call.name;
+        let selector = initializer_call.selector;
+        let args = initializer_call.args;
+        let instance = txe_oracles::deploy(self.path, name, args, self.secret);
 
         // initializer_call does not actually have the target_contract value set - it is created with the helper
         // `interface` function created by `generate_contract_interface` in the aztec macros - it represents a call to
@@ -107,12 +98,7 @@ impl<let N: u32> ContractDeployment<N> {
         // We probably want to introduce an intermediate struct to represent this, if we're going to keep this API.
         let _ = self.env.call_public::<T, _>(
             from,
-            PublicCallInterface::new(
-                instance.to_address(),
-                initializer_call.selector(),
-                initializer_call.name(),
-                initializer_call.args(),
-            ),
+            PublicCallInterface::new(instance.to_address(), selector, name, args),
         );
 
         instance.to_address()

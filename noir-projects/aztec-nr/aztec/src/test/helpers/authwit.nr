@@ -23,9 +23,10 @@ pub unconstrained fn add_private_authwit_from_call_interface<T, let M: u32>(
     let (chain_id, version) =
         env.utility_context(|context| (context.chain_id(), context.version()));
 
-    let target = call_interface.contract_address();
-    let args_hash = hash_args(call_interface.args());
-    let selector = call_interface.selector();
+    let target = call_interface.target_contract;
+    let args = call_interface.args;
+    let selector = call_interface.selector;
+    let args_hash = hash_args(args);
     let inner_hash =
         compute_inner_authwit_hash([caller.to_field(), selector.to_field(), args_hash]);
     let message_hash = compute_authwit_message_hash(target, chain_id, version, inner_hash);
@@ -41,9 +42,10 @@ pub unconstrained fn add_public_authwit_from_call_interface<T, let M: u32>(
     let (chain_id, version) =
         env.utility_context(|context| (context.chain_id(), context.version()));
 
-    let target = call_interface.contract_address();
-    let args_hash = hash_args(call_interface.args());
-    let selector = call_interface.selector();
+    let target = call_interface.target_contract;
+    let args = call_interface.args;
+    let selector = call_interface.selector;
+    let args_hash = hash_args(args);
     let inner_hash =
         compute_inner_authwit_hash([caller.to_field(), selector.to_field(), args_hash]);
     let message_hash = compute_authwit_message_hash(target, chain_id, version, inner_hash);
