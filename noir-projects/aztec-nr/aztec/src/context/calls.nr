@@ -8,10 +8,10 @@ use crate::context::{gas::GasOpts, private_context::PrivateContext, public_conte
 use crate::hash::{hash_args, hash_calldata};
 use crate::oracle::execution_cache;
 
-// PrivateCallInterface
+// PrivateCall
 
 #[must_use = "Your private call needs to be passed into the `self.call(...)` method to be executed (e.g. `self.call(MyContract::at(address).my_private_function(...args))`"]
-pub struct PrivateCallInterface<let M: u32, T> {
+pub struct PrivateCall<let M: u32, T> {
     pub target_contract: AztecAddress,
     pub selector: FunctionSelector,
     pub name: str<M>,
@@ -20,7 +20,7 @@ pub struct PrivateCallInterface<let M: u32, T> {
     return_type: T,
 }
 
-impl<let M: u32, T> PrivateCallInterface<M, T> {
+impl<let M: u32, T> PrivateCall<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,
@@ -32,14 +32,14 @@ impl<let M: u32, T> PrivateCallInterface<M, T> {
     }
 }
 
-impl<let M: u32, T> PrivateCallInterface<M, T>
+impl<let M: u32, T> PrivateCall<M, T>
 where
     T: Deserialize,
 {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.call(MyContract::at(address).my_private_function(...args))`
-    /// instead of manually constructing and calling `PrivateCallInterface`.
+    /// instead of manually constructing and calling `PrivateCall`.
     pub fn call(self, context: &mut PrivateContext) -> T {
         execution_cache::store(self.args, self.args_hash);
         let returns_hash = context.call_private_function_with_args_hash(
@@ -55,10 +55,10 @@ where
     }
 }
 
-// PrivateStaticCallInterface
+// PrivateStaticCall
 
 #[must_use = "Your private static call needs to be passed into the `self.view(...)` method to be executed (e.g. `self.view(MyContract::at(address).my_private_static_function(...args))`"]
-pub struct PrivateStaticCallInterface<let M: u32, T> {
+pub struct PrivateStaticCall<let M: u32, T> {
     pub target_contract: AztecAddress,
     pub selector: FunctionSelector,
     pub name: str<M>,
@@ -67,7 +67,7 @@ pub struct PrivateStaticCallInterface<let M: u32, T> {
     return_type: T,
 }
 
-impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
+impl<let M: u32, T> PrivateStaticCall<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,
@@ -81,7 +81,7 @@ impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.view(MyContract::at(address).my_private_static_function(...args))`
-    /// instead of manually constructing and calling `PrivateCallInterface`.
+    /// instead of manually constructing and calling `PrivateCall`.
     pub fn view(self, context: &mut PrivateContext) -> T
     where
         T: Deserialize,
@@ -97,10 +97,10 @@ impl<let M: u32, T> PrivateStaticCallInterface<M, T> {
     }
 }
 
-// PublicCallInterface
+// PublicCall
 
 #[must_use = "Your public call needs to be passed into the `self.call(...)`, `self.enqueue(...)` or `self.enqueue_incognito(...)` method to be executed (e.g. `self.call(MyContract::at(address).my_public_function(...args))`"]
-pub struct PublicCallInterface<let M: u32, T> {
+pub struct PublicCall<let M: u32, T> {
     pub target_contract: AztecAddress,
     pub selector: FunctionSelector,
     pub name: str<M>,
@@ -110,7 +110,7 @@ pub struct PublicCallInterface<let M: u32, T> {
     return_type: T,
 }
 
-impl<let M: u32, T> PublicCallInterface<M, T> {
+impl<let M: u32, T> PublicCall<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,
@@ -135,7 +135,7 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.call(MyContract::at(address).my_public_function(...args))`
-    /// instead of manually constructing and calling `PublicCallInterface`.
+    /// instead of manually constructing and calling `PublicCall`.
     pub unconstrained fn call(self, context: PublicContext) -> T
     where
         T: Deserialize,
@@ -154,7 +154,7 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.enqueue(MyContract::at(address).my_public_function(...args))`
-    /// instead of manually constructing and calling `PublicCallInterface`.
+    /// instead of manually constructing and calling `PublicCall`.
     pub fn enqueue(self, context: &mut PrivateContext) {
         self.enqueue_impl(context, false, false)
     }
@@ -162,7 +162,7 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.enqueue_incognito(MyContract::at(address).my_public_function(...args))`
-    /// instead of manually constructing and calling `PublicCallInterface`.
+    /// instead of manually constructing and calling `PublicCall`.
     pub fn enqueue_incognito(self, context: &mut PrivateContext) {
         self.enqueue_impl(context, false, true)
     }
@@ -187,7 +187,7 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.set_as_teardown(MyContract::at(address).my_public_function(...args))`
-    /// instead of manually constructing and setting the teardown function `PublicCallInterface`.
+    /// instead of manually constructing and setting the teardown function `PublicCall`.
     pub fn set_as_teardown(self, context: &mut PrivateContext) {
         self.set_as_teardown_impl(context, false);
     }
@@ -195,7 +195,7 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.set_as_teardown_incognito(MyContract::at(address).my_public_function(...args))`
-    /// instead of manually constructing and setting the teardown function `PublicCallInterface`.
+    /// instead of manually constructing and setting the teardown function `PublicCall`.
     pub fn set_as_teardown_incognito(self, context: &mut PrivateContext) {
         self.set_as_teardown_impl(context, true);
     }
@@ -213,10 +213,10 @@ impl<let M: u32, T> PublicCallInterface<M, T> {
     }
 }
 
-// PublicStaticCallInterface
+// PublicStaticCall
 
 #[must_use = "Your public static call needs to be passed into the `self.view(...)`, `self.enqueue_view(...)` or `self.enqueue_view_incognito(...)` method to be executed (e.g. `self.view(MyContract::at(address).my_public_static_function(...args))`"]
-pub struct PublicStaticCallInterface<let M: u32, T> {
+pub struct PublicStaticCall<let M: u32, T> {
     pub target_contract: AztecAddress,
     pub selector: FunctionSelector,
     pub name: str<M>,
@@ -225,7 +225,7 @@ pub struct PublicStaticCallInterface<let M: u32, T> {
     gas_opts: GasOpts,
 }
 
-impl<let M: u32, T> PublicStaticCallInterface<M, T> {
+impl<let M: u32, T> PublicStaticCall<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,
@@ -250,7 +250,7 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.view(MyContract::at(address).my_public_static_function(...args))`
-    /// instead of manually constructing and calling `PublicStaticCallInterface`.
+    /// instead of manually constructing and calling `PublicStaticCall`.
     pub unconstrained fn view(self, context: PublicContext) -> T
     where
         T: Deserialize,
@@ -267,7 +267,7 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.enqueue_view(MyContract::at(address).my_public_static_function(...args))`
-    /// instead of manually constructing and calling `PublicStaticCallInterface`.
+    /// instead of manually constructing and calling `PublicStaticCall`.
     pub fn enqueue_view(self, context: &mut PrivateContext) {
         let calldata = self.args.push_front(self.selector.to_field());
         let calldata_hash = hash_calldata(calldata);
@@ -284,7 +284,7 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
     /// **[DEPRECATED]**
     /// This function is deprecated. Please use the new contract API:
     /// `self.enqueue_view_incognito(MyContract::at(address).my_public_static_function(...args))`
-    /// instead of manually constructing and calling `PublicStaticCallInterface`.
+    /// instead of manually constructing and calling `PublicStaticCall`.
     pub fn enqueue_view_incognito(self, context: &mut PrivateContext) {
         let calldata = self.args.push_front(self.selector.to_field());
         let calldata_hash = hash_calldata(calldata);
@@ -299,9 +299,9 @@ impl<let M: u32, T> PublicStaticCallInterface<M, T> {
     }
 }
 
-// UtilityCallInterface
+// UtilityCall
 
-pub struct UtilityCallInterface<let M: u32, T> {
+pub struct UtilityCall<let M: u32, T> {
     pub target_contract: AztecAddress,
     pub selector: FunctionSelector,
     pub name: str<M>,
@@ -310,7 +310,7 @@ pub struct UtilityCallInterface<let M: u32, T> {
     return_type: T,
 }
 
-impl<let M: u32, T> UtilityCallInterface<M, T> {
+impl<let M: u32, T> UtilityCall<M, T> {
     pub fn new(
         target_contract: AztecAddress,
         selector: FunctionSelector,

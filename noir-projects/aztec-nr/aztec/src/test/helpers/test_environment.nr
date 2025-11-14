@@ -6,8 +6,8 @@ use protocol_types::{
 
 use crate::{
     context::{
-        PrivateCallInterface, PrivateContext, PrivateStaticCallInterface, PublicCallInterface,
-        PublicContext, PublicStaticCallInterface, UtilityCallInterface, UtilityContext,
+        PrivateCall, PrivateContext, PrivateStaticCall, PublicCall, PublicContext, PublicStaticCall,
+        UtilityCall, UtilityContext,
     },
     hash::hash_args,
     messages::{
@@ -385,7 +385,7 @@ impl TestEnvironment {
     ///
     /// The returned account has a full set of privacy keys, so it can nullify notes, receive messages, etc. It also has
     /// an associated `SchnorrAccount` contract that can process authwit requests - the authwits can be added via the
-    /// `add_private_authwit_from_call_interface` and `add_public_authwit_from_call_interface` helper functions. If
+    /// `add_private_authwit_from_call` and `add_public_authwit_from_call` helper functions. If
     /// authwits are not required, consider using `create_light_account` instead, which is a faster variant of this
     /// function.
     ///
@@ -398,7 +398,7 @@ impl TestEnvironment {
 
         let _ = self.call_private(
             AztecAddress::zero(),
-            PrivateCallInterface::<_, ()>::new(
+            PrivateCall::<_, ()>::new(
                 address,
                 comptime { FunctionSelector::from_signature("constructor(Field,Field)") },
                 "constructor",
@@ -497,7 +497,7 @@ impl TestEnvironment {
     pub unconstrained fn call_private<T, let M: u32>(
         _self: Self,
         from: AztecAddress,
-        call: PrivateCallInterface<M, T>,
+        call: PrivateCall<M, T>,
     ) -> T
     where
         T: Deserialize,
@@ -520,7 +520,7 @@ impl TestEnvironment {
     /// executable in a static context, and these produce no side effects).
     pub unconstrained fn view_private<T, let M: u32>(
         _self: Self,
-        call: PrivateStaticCallInterface<M, T>,
+        call: PrivateStaticCall<M, T>,
     ) -> T
     where
         T: Deserialize,
@@ -546,10 +546,7 @@ impl TestEnvironment {
     /// let contract_addr = env.deploy("SampleContract").without_initializer();
     /// let return_value = env.simulate_utility(SampleContract::at(contract_addr).sample_utility_function());
     /// ```
-    pub unconstrained fn simulate_utility<T, let M: u32>(
-        _self: Self,
-        call: UtilityCallInterface<M, T>,
-    ) -> T
+    pub unconstrained fn simulate_utility<T, let M: u32>(_self: Self, call: UtilityCall<M, T>) -> T
     where
         T: Deserialize,
     {
@@ -580,7 +577,7 @@ impl TestEnvironment {
     pub unconstrained fn call_public<T, let M: u32>(
         _self: Self,
         from: AztecAddress,
-        call: PublicCallInterface<M, T>,
+        call: PublicCall<M, T>,
     ) -> T
     where
         T: Deserialize,
@@ -601,7 +598,7 @@ impl TestEnvironment {
     pub unconstrained fn call_public_incognito<T, let M: u32>(
         _self: Self,
         from: AztecAddress,
-        call: PublicCallInterface<M, T>,
+        call: PublicCall<M, T>,
     ) -> T
     where
         T: Deserialize,
@@ -621,10 +618,7 @@ impl TestEnvironment {
     ///
     /// Unlike `call_public`, no transaction is created and no block is mined (since `#[view]` functions are only
     /// executable in a static context, and these produce no side effects).
-    pub unconstrained fn view_public<T, let M: u32>(
-        _self: Self,
-        call: PublicStaticCallInterface<M, T>,
-    ) -> T
+    pub unconstrained fn view_public<T, let M: u32>(_self: Self, call: PublicStaticCall<M, T>) -> T
     where
         T: Deserialize,
     {
@@ -645,7 +639,7 @@ impl TestEnvironment {
     /// executable in a static context, and these produce no side effects).
     pub unconstrained fn view_public_incognito<T, let M: u32>(
         _self: Self,
-        call: PublicStaticCallInterface<M, T>,
+        call: PublicStaticCall<M, T>,
     ) -> T
     where
         T: Deserialize,

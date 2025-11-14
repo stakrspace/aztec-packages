@@ -1,6 +1,6 @@
 use crate::{
     authwit::auth::{compute_authwit_message_hash, IS_VALID_SELECTOR},
-    context::call_interfaces::PrivateCallInterface,
+    context::calls::PrivateCall,
     keys::getters::get_public_keys,
     test::helpers::{test_environment::TestEnvironment, txe_oracles},
 };
@@ -62,7 +62,7 @@ unconstrained fn light_accounts_fail_on_private_authwit_checks() {
 
     env.call_private(
         caller,
-        PrivateCallInterface::new(
+        PrivateCall::new(
             light_account,
             comptime { FunctionSelector::from_signature("verify_private_authwit(Field)") },
             "verify_private_authwit",
@@ -81,7 +81,7 @@ unconstrained fn contract_accounts_reject_invalid_private_authwits() {
 
     env.call_private(
         caller,
-        PrivateCallInterface::new(
+        PrivateCall::new(
             contract_account,
             comptime { FunctionSelector::from_signature("verify_private_authwit(Field)") },
             "verify_private_authwit",
@@ -106,7 +106,7 @@ unconstrained fn contract_accounts_accept_valid_private_authwits() {
 
     let result = env.call_private(
         caller,
-        PrivateCallInterface::new(
+        PrivateCall::new(
             contract_account,
             comptime { FunctionSelector::from_signature("verify_private_authwit(Field)") },
             "verify_private_authwit",

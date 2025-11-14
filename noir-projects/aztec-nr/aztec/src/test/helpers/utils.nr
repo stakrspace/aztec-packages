@@ -1,5 +1,5 @@
 use crate::{
-    context::{PrivateCallInterface, PublicCallInterface},
+    context::{PrivateCall, PublicCall},
     test::helpers::{test_environment::TestEnvironment, txe_oracles},
 };
 use protocol_types::{
@@ -37,7 +37,7 @@ impl<let N: u32> ContractDeployment<N> {
     pub unconstrained fn with_private_initializer<T, let P: u32>(
         self,
         from: AztecAddress,
-        initializer_call: PrivateCallInterface<P, T>,
+        initializer_call: PrivateCall<P, T>,
     ) -> AztecAddress
     where
         T: Deserialize,
@@ -54,7 +54,7 @@ impl<let N: u32> ContractDeployment<N> {
         // We probably want to introduce an intermediate struct to represent this, if we're going to keep this API.
         let _ = self.env.call_private::<T, _>(
             from,
-            PrivateCallInterface::new(instance.to_address(), selector, name, args),
+            PrivateCall::new(instance.to_address(), selector, name, args),
         );
 
         instance.to_address()
@@ -81,7 +81,7 @@ impl<let N: u32> ContractDeployment<N> {
     pub unconstrained fn with_public_initializer<let P: u32, T>(
         self,
         from: AztecAddress,
-        initializer_call: PublicCallInterface<P, T>,
+        initializer_call: PublicCall<P, T>,
     ) -> AztecAddress
     where
         T: Deserialize,
@@ -98,7 +98,7 @@ impl<let N: u32> ContractDeployment<N> {
         // We probably want to introduce an intermediate struct to represent this, if we're going to keep this API.
         let _ = self.env.call_public::<T, _>(
             from,
-            PublicCallInterface::new(instance.to_address(), selector, name, args),
+            PublicCall::new(instance.to_address(), selector, name, args),
         );
 
         instance.to_address()
