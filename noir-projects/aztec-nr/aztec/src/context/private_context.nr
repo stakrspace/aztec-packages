@@ -1,6 +1,6 @@
 use crate::{
     context::{inputs::PrivateContextInputs, returns_hash::ReturnsHash},
-    hash::{hash_args_array, hash_calldata_array},
+    hash::{hash_args, hash_calldata_array},
     keys::constants::{NULLIFIER_INDEX, NUM_KEY_TYPES, OUTGOING_INDEX, sk_generators},
     messaging::process_l1_to_l2_message,
     oracle::{
@@ -565,7 +565,7 @@ impl PrivateContext {
     /// * `serialized_return_values` - The serialized return values as a field array
     ///
     pub fn set_return_hash<let N: u32>(&mut self, serialized_return_values: [Field; N]) {
-        let return_hash = hash_args_array(serialized_return_values);
+        let return_hash = hash_args(serialized_return_values);
         self.return_hash = return_hash;
         execution_cache::store(serialized_return_values, return_hash);
     }
@@ -1190,7 +1190,7 @@ impl PrivateContext {
         function_selector: FunctionSelector,
         args: [Field; ArgsCount],
     ) -> ReturnsHash {
-        let args_hash = hash_args_array(args);
+        let args_hash = hash_args(args);
         execution_cache::store(args, args_hash);
         self.call_private_function_with_args_hash(
             contract_address,
@@ -1224,7 +1224,7 @@ impl PrivateContext {
         function_selector: FunctionSelector,
         args: [Field; ArgsCount],
     ) -> ReturnsHash {
-        let args_hash = hash_args_array(args);
+        let args_hash = hash_args(args);
         execution_cache::store(args, args_hash);
         self.call_private_function_with_args_hash(
             contract_address,

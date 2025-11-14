@@ -21,7 +21,7 @@ pub contract SimpleToken {
             storage::storage,
         },
         messages::message_delivery::MessageDelivery,
-        protocol_types::address::AztecAddress,
+        protocol_types::{address::AztecAddress, traits::Serialize},
         state_vars::{Map, PublicImmutable, PublicMutable},
     };
 
@@ -298,7 +298,7 @@ pub contract SimpleToken {
         context: PrivateContext,
         account: AztecAddress,
         remaining: u128,
-    ) -> PrivateCall<25, u128> {
+    ) -> PrivateCall<25, 2, u128> {
         SimpleToken::at(context.this_address())._recurse_subtract_balance(account, remaining)
     }
 
