@@ -11,6 +11,7 @@
 #include "barretenberg/vm2/simulation/events/tx_context_event.hpp"
 #include "barretenberg/vm2/simulation/events/tx_events.hpp"
 #include "barretenberg/vm2/simulation/gadgets/tx_context.hpp"
+#include "barretenberg/vm2/simulation/interfaces/call_stack_metadata_collector.hpp"
 #include "barretenberg/vm2/simulation/interfaces/context_provider.hpp"
 #include "barretenberg/vm2/simulation/interfaces/db.hpp"
 #include "barretenberg/vm2/simulation/interfaces/execution.hpp"
@@ -26,7 +27,6 @@ namespace bb::avm2::simulation {
 struct TxExecutionResult {
     GasUsed gas_used;
     RevertCode revert_code = RevertCode::OK;
-    std::vector<CallStackMetadata> app_logic_return_values;
 };
 
 // In charge of executing a transaction.
@@ -41,21 +41,21 @@ class TxExecution final {
                 SideEffectTrackerInterface& side_effect_tracker,
                 FieldGreaterThanInterface& field_gt,
                 Poseidon2Interface& poseidon2,
-                EventEmitterInterface<TxEvent>& event_emitter,
-                bool collect_call_metadata = false)
+                CallStackMetadataCollectorInterface& call_stack_metadata_collector,
+                EventEmitterInterface<TxEvent>& event_emitter)
         : call_execution(call_execution)
         , context_provider(context_provider)
         , contract_db(contract_db)
         , merkle_db(merkle_db)
         , field_gt(field_gt)
         , poseidon2(poseidon2)
+        , call_stack_metadata_collector(call_stack_metadata_collector)
         , events(event_emitter)
         , tx_context(merkle_db,
                      written_public_data_slots_tree,
                      retrieved_bytecodes_tree,
                      context_provider,
                      side_effect_tracker)
-        , collect_call_metadata(collect_call_metadata)
     {}
 
     TxExecutionResult simulate(const Tx& tx);
@@ -69,10 +69,10 @@ class TxExecution final {
     HighLevelMerkleDBInterface& merkle_db;
     FieldGreaterThanInterface& field_gt;
     Poseidon2Interface& poseidon2;
+    CallStackMetadataCollectorInterface& call_stack_metadata_collector;
     EventEmitterInterface<TxEvent>& events;
 
     TxContext tx_context;
-    bool collect_call_metadata;
 
     // This function can throw if there is a nullifier collision.
     void insert_non_revertibles(const Tx& tx);
