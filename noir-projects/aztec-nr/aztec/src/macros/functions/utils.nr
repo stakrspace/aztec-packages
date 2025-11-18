@@ -4,9 +4,9 @@ use crate::macros::{
     functions::auth_registry::AUTHORIZE_ONCE_REGISTRY,
     notes::NOTES,
     utils::{
-        fn_has_authorize_once, fn_has_noinitcheck, is_fn_contract_library_method, is_fn_external,
-        is_fn_initializer, is_fn_internal, is_fn_only_self, is_fn_test, is_fn_view,
-        module_has_initializer, module_has_storage,
+        fn_has_authorize_once, fn_has_noinitcheck, fn_has_nophasecheck,
+        is_fn_contract_library_method, is_fn_external, is_fn_initializer, is_fn_internal,
+        is_fn_only_self, is_fn_test, is_fn_view, module_has_initializer, module_has_storage,
     },
 };
 use dep::protocol_types::meta::utils::derive_serialization_quotes;
@@ -123,6 +123,25 @@ pub(crate) comptime fn transform_private(f: FunctionDefinition) -> Quoted {
         quote {}
     };
 
+    // Phase checks are skipped in functions that request to manually handle phases
+    let initial_phase_store = if fn_has_nophasecheck(f) {
+        quote {}
+    } else {
+        quote { let within_revertible_phase: bool = self.context.in_revertible_phase(); }
+    };
+
+    let no_phase_change_check = if fn_has_nophasecheck(f) {
+        quote {}
+    } else {
+        quote {   
+            assert_eq(
+                within_revertible_phase,
+                self.context.in_revertible_phase(),
+                f"Phase change detected on function with phase check. If this is expected, use #[nophasecheck]",
+            ); 
+        }
+    };
+
     // All private functions perform message discovery, since they may need to access notes. This is slightly
     // inefficient and could be improved by only doing it once we actually attempt to read any. Note that the message
     // discovery call syncs private events as well. We do not sync those here if there are no notes because we don't
@@ -190,6 +209,7 @@ pub(crate) comptime fn transform_private(f: FunctionDefinition) -> Quoted {
     let to_prepend = quote {
         dep::aztec::oracle::version::assert_compatible_oracle_version();
         $contract_self_creation
+        $initial_phase_store
         $assert_initializer
         $init_check
         $internal_check
@@ -203,6 +223,7 @@ pub(crate) comptime fn transform_private(f: FunctionDefinition) -> Quoted {
     let to_append = quote {
         $return_value
         $mark_as_initialized
+        $no_phase_change_check
         $context_finish
     };
 

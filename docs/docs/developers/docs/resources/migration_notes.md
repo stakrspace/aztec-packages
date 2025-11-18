@@ -19,6 +19,11 @@ The sandbox command has been renamed and remapped to "local network". We believe
 
 ## [Aztec.nr]
 
+### Phase checks
+
+Now private external functions check by default that no phase change from non revertible to revertible happens during the execution of the function or any of its nested calls. If you're developing a function
+that handles phase change (you call `context.end_setup()` or call a function that you expect will change phase) you need to opt out of the phase check using the `#[nophasecheck]` macro. Also, now it's possible to know if you're in the revertible phase of the transaction at any point using `self.context.in_revertible_phase()`.
+
 ### Renaming #[internal] as #[only_self]
 
 We want for internal to mean the same as in Solidity where internal function can be called only from the same contract
