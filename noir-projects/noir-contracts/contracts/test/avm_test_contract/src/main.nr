@@ -829,12 +829,8 @@ pub contract AvmTest {
     ) -> Field {
         let selector =
             comptime { FunctionSelector::from_signature("add_args_return(Field,Field)") };
-        context.static_call_public_function(
-            address,
-            selector,
-            [arg_a, arg_b].as_slice(),
-            GasOpts::default(),
-        )[0]
+        context.static_call_public_function(address, selector, [arg_a, arg_b], GasOpts::default())
+            [0]
     }
 
     // Indirectly call_static `set_storage_single`. Should revert since it's accessing self.storage.
@@ -845,7 +841,7 @@ pub contract AvmTest {
         let _ = self.context.static_call_public_function(
             self.address,
             selector,
-            args.as_slice(),
+            args,
             GasOpts::default(),
         );
     }
