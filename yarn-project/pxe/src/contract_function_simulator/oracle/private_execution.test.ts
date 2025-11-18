@@ -379,7 +379,7 @@ describe('Private Execution test suite', () => {
       // `hash(firstNullifier, noteHashIndex)`
       const noteHashIndex = randomInt(1); // mock index in TX's final noteHashes array
       const noteNonce = await computeNoteHashNonce(mockFirstNullifier, noteHashIndex);
-      const note = new Note([new Fr(amount), ownerAddress.toField(), Fr.random()]);
+      const note = new Note([new Fr(amount), ownerAddress.toField()]);
       // Note: The following does not correspond to how note hashing is generally done in real notes.
       const noteHash = await poseidon2Hash([storageSlot, ...note.items]);
       const randomness = Fr.random();
